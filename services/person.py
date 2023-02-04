@@ -17,12 +17,11 @@ class PersonService():
         return person
 
     def create(self, person: PersonCreate):
-        new_person = PersonModel(**person.dict())
 
-        result = self.db["people"].insert_one(new_person.dict())
+        result = self.db["people"].insert_one(person.dict())
         person = self.db["people"].find_one({"_id": result.inserted_id})
         print(person)
-        return new_person
+        return result
     
     def update(self, id: int, person: PersonCreate):
         person_db = self.db["people"].update_one({"_id": id}, {"$set": person.dict()})

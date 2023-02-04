@@ -7,44 +7,27 @@ class VehicleService():
         self.db = db
     
     def get(self):
-        vehicles = self.db.query(VehicleModel).all()
+        vehicles = self.db["vehicles"].find()
 
         self.db.close()
         return vehicles
 
     def get_vehicle(self, id: int):
-        vehicle = self.db.query(VehicleModel).filter(VehicleModel.id == id).first()
+        vehicle = self.db["vehicles"].find_one({"_id": id})
 
         self.db.close()
         return vehicle
 
     def create(self, vehicle: Vehicle):
-        new_vehicle = VehicleModel(**vehicle.dict())
-
-        self.db.add(new_vehicle)
-        self.db.commit()
-        self.db.refresh(new_vehicle)
-        self.db.close()
-        return new_vehicle
+        result = self.db["vehicles"].insert_one(vehicle.dict())
+        return result
 
     def update(self, id: int, vehicle: Vehicle):
-        vehicle_db = self.db.query(VehicleModel).filter(VehicleModel.id == id).first()
-
-        vehicle_db.plate = vehicle.plate if vehicle.plate else vehicle_db.plate
-        vehicle_db.brand = vehicle.brand if vehicle.brand else vehicle_db.brand
-        vehicle_db.model = vehicle.model if vehicle.model else vehicle_db.model
-        vehicle_db.doors = vehicle.doors if vehicle.doors else vehicle_db.doors
-        vehicle_db.vehicle_type = vehicle.vehicle_type if vehicle.vehicle_type else vehicle_db.vehicle_type
-
-        self.db.commit()
-        self.db.close()
+        vehicle_db = self.db["vehicles"].update_one({"_id": id}, {"$set": vehicle.dict()})
         return vehicle_db
 
     def delete(self, id: int):
-        vehicle_db = self.db.query(VehicleModel).filter(VehicleModel.id == id).first()
+        vehicle_db = self.db["vehicles"].delete_one({"_id": id})
         
-        self.db.delete(vehicle_db)
-        self.db.commit()
-        self.db.close()
         return vehicle_db
 

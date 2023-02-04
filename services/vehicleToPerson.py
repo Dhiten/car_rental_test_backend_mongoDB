@@ -7,47 +7,39 @@ class VehicleToPerson():
         self.db = db
 
     def get(self):
-        vehicle_persons = self.db.query(VehiclePersonModel).all()
+        vehicle_persons = self.db["vehicleToPerson"].find()
 
         self.db.close()
         return vehicle_persons
 
     def get_People_by_vehicle(self, vehicle_id: int):
-        vehicle_person = self.db.query(VehiclePersonModel).filter(VehiclePersonModel.vehicle_id == vehicle_id).first()
+        vehicle_person = self.db["vehicleToPerson"].find({"vehicle_id": vehicle_id})
 
         self.db.close()
         return vehicle_person
 
     def get_vehicles_by_person(self, person_id: int):
-        vehicle_person = self.db.query(VehiclePersonModel).filter(VehiclePersonModel.person_id == person_id).first()
+        vehicle_person = self.db["vehicleToPerson"].find({"person_id": person_id})
 
         self.db.close()
         return vehicle_person
 
     def get_vehicleToPerson(self, vehicle_id: int, person_id: int):
-        vehicle_person = self.db.query(VehiclePersonModel).filter(VehiclePersonModel.vehicle_id == vehicle_id, VehiclePersonModel.person_id == person_id).first()
+        vehicle_person = self.db["vehicleToPerson"].find_one({"person_id": person_id, "vehicle_id": vehicle_id})
 
         self.db.close()
         return vehicle_person
 
     def create(self, vehicle_person: VehiclePerson):
-        vehicle_person = VehiclePersonModel(**vehicle_person.dict())
 
-        self.db.add(vehicle_person)
-        self.db.commit()
-        self.db.close()
+        vehicle_person = self.db["vehicleToPerson"].insert_one(vehicle_person.dict())
         return vehicle_person
 
     def update(self, vehicle_person: VehiclePerson):
-        self.db.query(VehiclePersonModel).filter(VehiclePersonModel.vehicle_id == vehicle_person.vehicle_id, VehiclePersonModel.person_id == vehicle_person.person_id).update(vehicle_person.dict())
-
-        self.db.commit()
-        self.db.close()
+        vehicle_person = self.db["vehicleToPerson"].update_one({"person_id": vehicle_person.person_id, "vehicle_id": vehicle_person.vehicle_id}, {"$set": vehicle_person.dict()})
         return vehicle_person
 
     def delete(self, vehicle_id: int, person_id: int):
-        self.db.query(VehiclePersonModel).filter(VehiclePersonModel.vehicle_id == vehicle_id, VehiclePersonModel.person_id == person_id).delete()
+        vehicle_person = self.db["vehicleToPerson"].delete_one({"person_id": person_id, "vehicle_id": vehicle_id})
         
-        self.db.commit()
-        self.db.close()
-        return True
+        return vehicle_person
